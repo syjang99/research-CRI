@@ -1,0 +1,61 @@
+Principal Components Analysis
+Call: principal(r = select(foodg_sum_table, -total, -CAN_ID), nfactors = 2, 
+    rotate = "promax")
+Standardized loadings (pattern matrix) based upon correlation matrix
+          RC2   RC1    h2   u2 com
+group1   0.31 -0.13 0.074 0.93 1.3
+group2   0.48 -0.20 0.176 0.82 1.4
+group3   0.61 -0.02 0.360 0.64 1.0
+group4  -0.07  0.77 0.554 0.45 1.0
+group5   0.26  0.33 0.261 0.74 1.9
+group6  -0.14  0.63 0.332 0.67 1.1
+group7  -0.19  0.57 0.259 0.74 1.2
+group8   0.00  0.77 0.592 0.41 1.0
+group9   0.15  0.67 0.562 0.44 1.1
+group10  0.37 -0.01 0.135 0.87 1.0
+group11  0.60  0.06 0.399 0.60 1.0
+group12  0.45  0.12 0.273 0.73 1.1
+group13  0.33  0.53 0.563 0.44 1.7
+group14  0.11  0.67 0.528 0.47 1.0
+group15 -0.04  0.64 0.389 0.61 1.0
+group16  0.17  0.59 0.475 0.52 1.2
+group17  0.62  0.16 0.503 0.50 1.1
+group18  0.12  0.49 0.313 0.69 1.1
+group19  0.43  0.36 0.456 0.54 1.9
+group20  0.48  0.36 0.530 0.47 1.9
+group21  0.68 -0.12 0.394 0.61 1.1
+group22  0.29  0.19 0.175 0.82 1.7
+group23  0.21  0.04 0.055 0.95 1.1
+group24  0.39  0.23 0.290 0.71 1.6
+group25  0.59  0.02 0.363 0.64 1.0
+group26  0.42  0.13 0.240 0.76 1.2
+group27  0.78  0.10 0.702 0.30 1.0
+group28  0.72  0.24 0.750 0.25 1.2
+group29  0.54 -0.12 0.239 0.76 1.1
+group30  0.65 -0.33 0.318 0.68 1.5
+group31  0.52  0.34 0.552 0.45 1.7
+group32  0.21  0.66 0.612 0.39 1.2
+group33  0.69  0.18 0.629 0.37 1.1
+group34 -0.16  0.48 0.179 0.82 1.2
+group35  0.14  0.22 0.096 0.90 1.7
+group36  0.18  0.66 0.589 0.41 1.2
+
+                       RC2  RC1
+SS loadings           7.12 6.80
+Proportion Var        0.20 0.19
+Cumulative Var        0.20 0.39
+Proportion Explained  0.51 0.49
+Cumulative Proportion 0.51 1.00
+
+ With component correlations of 
+     RC2  RC1
+RC2 1.00 0.49
+RC1 0.49 1.00
+
+Mean item complexity =  1.3
+Test of the hypothesis that 2 components are sufficient.
+
+The root mean square of the residuals (RMSR) is  0.06 
+ with the empirical chi square  2819.06  with prob <  2.5e-297 
+
+Fit based upon off diagonal values = 0.96
