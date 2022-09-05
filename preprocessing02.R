@@ -30,6 +30,7 @@ foodg_sum = ffq_sm %>% group_by(CAN_ID, food_group, food_group_name) %>%
 foodg_sum %>% View()
 write_csv(foodg_sum,'foodg_sum.csv')
 
+
 #standardize across row (adjust for individual difference)
 
 ## why?
@@ -43,7 +44,6 @@ foodg_sum %>% filter(food_group==1, energy>10, energy_total<=4000) %>%
   theme(title = element_text(size=15),
         axis.text= element_text(size=13))
 
-foodg_sum %>% group_by()
 
 
 #energy total by id histogram
@@ -56,6 +56,15 @@ foodg_sum %>% select(CAN_ID, energy_total) %>% distinct() %>%
   theme(title = element_text(size=15),
         axis.text= element_text(size=13)) #skewed
 
+foodg_sum_w %>% select(CAN_ID, weight_total) %>% distinct() %>%
+  ggplot(aes(weight_total))+ 
+  geom_histogram(aes(y = ..density..), alpha=.2, fill='dodgerblue')+
+  geom_density(color='red', size=1)+
+  labs(title = "Distribution of total weight sum per patient ID",
+       x="Total weight (kcal)")+
+  theme(title = element_text(size=15),
+        axis.text= element_text(size=13)) #skewed
+
 foodg_sum %>% select(CAN_ID, energy_total) %>% distinct() %>%
   ungroup() %>%
   select(energy_total) %>% unlist() %>%
@@ -63,30 +72,68 @@ foodg_sum %>% select(CAN_ID, energy_total) %>% distinct() %>%
 
 
 ## 1. residual method
-res_models = foodg_sum %>% 
-  filter(energy>0) %>%
-  group_by(food_group) %>%
-  do(lm_mod = lm(energy ~ energy_total, data=.),
-     ll_mod = lm(log(energy) ~ log(energy_total), data=.),
-     log_mod = lm(log(energy) ~ energy_total, data=.)) %>%
-  pivot_longer(cols=ends_with("mod"), names_to = "model_type",values_to = "model") 
-
-
-## 2. normalization by row
-
-
-
-#Tung's code
-a.ffq <- cbind(ffq[,1:2], sapply(which(colnames(ffq)=='var2'):which(colnames(ffq)=='Food106'), function(i){
-  fit <- lm(ffq[,i]~var1, data=ffq)
-  fit$residuals + fit$coefficients[1] + fit$coefficients[2]*mean(ffq$var1)
-})); colnames(a.ffq) <- colnames(ffq)
-
-
 # My code
-ffq %>%
-  group_by('CAN_ID') %>%
-  mutate_at(nutrient_cols, function(i) {fit <- lm(ffq[,i] ~ energy)})
+foodg_sum_new = foodg_sum %>%
+  #filter(energy>0, energy<4000) %>%
+  group_by(food_group, food_group_name) %>%
+  mutate(res = resid(lm(log(energy) ~ energy_total)),
+         b0 = coef(lm(log(energy) ~ energy_total))[[1]],
+         b1 = coef(lm(log(energy) ~ energy_total))[[2]],
+         mu_hat = mean(energy),
+         energy_new = exp(res+ b0 + b1*mu_hat))
+
+foodg_sum_new2 = foodg_sum %>%
+  filter(energy>0, energy<4000) %>%
+  group_by(food_group, food_group_name) %>%
+  mutate(res = resid(lm(log(energy) ~ log(energy_total))),
+         b0 = coef(lm(log(energy) ~ log(energy_total)))[[1]],
+         b1 = coef(lm(log(energy) ~ log(energy_total)))[[2]],
+         mu_hat = mean(energy),
+         energy_new = exp(b0 + b1*log(mu_hat)))
+
+#
+par(mfrow=c(1,2))
+foodg_sum %>% filter(food_group==1) %>%
+  ggplot(aes(energy_total, energy)) +
+  geom_point(alpha=.3) + geom_smooth(method='lm', col='red', alpha=.9)+
+  labs(title="Energy obtained by eating whole grains vs. Total sum of energy",
+       subtitle="(Outlier rows with total sum under 10 or over 8000 kcal were removed.)",
+       y= "Energy from whole grains (kcal)",
+       x = "Total sum of energy (kcal)")+
+  theme(title = element_text(size=15),
+        axis.text= element_text(size=13))
+
+foodg_sum_new %>% filter(food_group==1) %>%
+  ggplot(aes(energy_total, energy_new)) +
+  geom_point(alpha=.3) + geom_smooth(method='lm', col='red', alpha=.9)+
+  labs(title="Energy obtained by eating whole grains vs. Total sum of energy",
+       subtitle="(Outlier rows with total sum under 10 or over 8000 kcal were removed.)",
+       y= "Energy from whole grains (kcal)",
+       x = "Total sum of energy (kcal)")+
+  theme(title = element_text(size=15),
+        axis.text= element_text(size=13))
+
+write_csv(foodg_sum_new, 'sum_by_food_group.csv')
+
+foodg_sum_new2 %>% filter(food_group==1, energy_total<10000) %>%
+  ggplot(aes(energy_total, energy_new)) +
+  geom_point(alpha=.3) + geom_smooth(method='lm', col='red', alpha=.9)+
+  labs(title="Energy obtained by eating whole grains vs. Total sum of energy",
+       subtitle="(Outlier rows with total sum under 10 or over 8000 kcal were removed.)",
+       y= "Energy from whole grains (kcal)",
+       x = "Total sum of energy (kcal)")+
+  theme(title = element_text(size=15),
+        axis.text= element_text(size=13))
+
+
+## row by standardization
+
+foodg_sum %>% 
+  group_by(CAN_ID) %>% mutate(weight_new = scale(weight)) %>%
+  filter(food_group==1, energy_total<5000) %>%
+  ggplot(aes(energy_total, energy_new)) +
+  geom_point(alpha=.3) + geom_smooth(method='lm', col='red', alpha=.9)
+  
 
 # assumption tests for using residual method
 ## visualization
@@ -119,3 +166,4 @@ lm(log(Fiber) ~ log(Kcal), data = diet[diet$X00_SEX==2,]) %>% summary()
 
 
 # 한번에 잔차법 결과 내보내기
+
