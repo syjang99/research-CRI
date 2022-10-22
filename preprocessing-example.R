@@ -1,31 +1,31 @@
-setwd('C:/Users/syjan/Desktop/암연구소 인턴/CRC_research')
+#setwd('C:/Users/syjan/Desktop/internship/research-CRC')
 library(tidyverse)
 library(readxl)
-#library(sas7bdat)
-library(haven) #이게 더 빠르당
+#library(sas7bdat) #read sas file -> 느림
+library(haven) #이게 더 빠르다
 library(stringr)
 
 
-#환자정보데이터(연습용)
+#(1) 환자정보데이터
 patient_info = read_xlsx('DATA_na_removed.xlsx')
 head(patient_info)
 colnames(patient_info)
 View(patient_info)
 dim(patient_info) #540, 200
 
-#식이데이터 변수명
+#(2) 식이데이터 변수명
 ffq_protocol = read_xlsx('ffq_protocol.xlsx', sheet=1) %>%
   select(1:5) %>% rename('content' = '...5') 
 View(ffq_protocol)
 
-#식이데이터
+#(3) 환자 식이데이터
 ffq = read_sas('FFQ540.sas7bdat')
 head(ffq)
 View(ffq)
 dim(ffq) #362340, 103
 
 
-#변수명 예쁘게 저장하기
+#(4) 변수명 예쁘게 저장하기
 ffq_protocol = ffq_protocol %>%
   mutate(var_name = str_to_lower(content),
          var_name = str_replae(var_name,"\\([^()]+\\)", ''),
@@ -35,14 +35,14 @@ ffq_protocol = ffq_protocol %>%
 ffq_protocol$var_name[62:63] = c('clupanodonic_acid', 'osbond_acid')
 View(ffq_protocol)
 
-
 colnames(ffq)[8:103] = ffq_protocol$var_name[7:102]
 View(ffq)
 
 
-#식품군 35가지로 재분류하기 thx to Tung
-# food_group (숫자), food_group_name (이름) 
+#(5) 106가지 식품 -> 35가지 식품군으로 재분류하기 (code from Tung)
+#food_group: group index, food_group_name: group name
 
+#food group
 ffq = ffq %>% 
   mutate(food_group = case_when(
     foodc %in% c(11003010,11011010,11018010,12001000,12006000) ~ 1,
@@ -89,6 +89,7 @@ ffq = ffq %>%
     TRUE ~ NA_real_
   ))
 
+#food group name 저장
 food_group_names <- tribble(
   ~food_group, ~food_group_name,
   1, "Refined grains",
@@ -129,13 +130,14 @@ food_group_names <- tribble(
   36, "Alcohol"
 )
 
+#merge 
 ffq = ffq %>% left_join(food_group_names, by='food_group') 
 colSums(is.na(ffq))
 
+#확인
 ffq %>% select(contains("food")) %>% distinct() %>% View()
 
-#필요한 column만 추출, 변수명 변경해 저장 
-#(영양소 제외))
+#(6) 필요한 column만 추출, 변수명 변경해 저장, 영양소 데이터 제거
 ffq = ffq %>% 
   arrange(CAN_ID) %>%
   rename('food_type_code' = 'way',
@@ -150,18 +152,13 @@ colSums(is.na(ffq_sm)) #0
 dim(ffq_sm) #362340,9
 
 
-#problem
-ffq_sm %>% filter(CAN_ID=='A002', food_name=='고추가루') %>% View()
-
-
-#데이터 merge
+#(7)환자정보+식이정보 full data 생성 후 저장
 full_dat = patient_info %>% inner_join(ffq, by='CAN_ID') %>%
   arrange(CAN_ID)
 dim(full_dat) #204149, 304
 head(full_dat)
 colnames(full_dat) 
 
-# csv로 저장
 write_csv(ffq_protocol, 'ffq_protocol.csv')
 write_csv(ffq,'ffq.csv')
 write_csv(ffq_sm, 'ffq_sm.csv')
