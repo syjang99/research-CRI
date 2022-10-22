@@ -1,4 +1,4 @@
-## Research on Colorectal Cancer
+## Cancer Research Institute Internship
 
 * [서울대학교 암연구소](https://cri.snu.ac.kr/) 종양생물학 하계인턴 활동 내용을 정리한 폴더입니다.
 
