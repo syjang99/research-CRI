@@ -1,8 +1,8 @@
-## Cancer Research Institute Internship
+## SNU Cancer Research Institute Internship
 
 * [서울대학교 암연구소](https://cri.snu.ac.kr/) 종양생물학 하계인턴 활동 내용을 정리한 폴더입니다.
 
-## Files
+### Files
 * 개인연구 관련
   * `research-proposal`: 개인연구 프로포절 (pdf)
   * `research-presentation`: 개인연구 발표자료 (pdf)
