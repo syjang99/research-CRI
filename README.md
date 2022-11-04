@@ -9,5 +9,5 @@
   * `preprocessing-example.R`: 개인연구에 사용한 전처리 코드 예시
 
 * 기타
-  * `pubmed-search-filter`: 결핵(TB) 논문 목록 중 6개 기준에 맞춰 필터링 진행한 코드 및 설명 (ipynb)
+  * `pubmed-search-filter.ipynb`: 결핵(TB) 논문 목록 중 6개 기준에 맞춰 필터링 진행한 코드 및 설명
 
